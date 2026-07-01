@@ -6,7 +6,7 @@ import ProductCard from '../components/ProductCard';
 
 export default function ShopView() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Strictly derive all states from URL params
   const searchVal = searchParams.get('search') || '';
   const tagVal = searchParams.get('tag') || '';
@@ -18,7 +18,10 @@ export default function ShopView() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Sync products list when query params change
+  // Sync products list when query params change.
+  // IMPORTANT: depend on searchParams.toString() (a stable primitive),
+  // NOT on selectedCategories/selectedBrands, which are new array
+  // references on every render and would cause an infinite loop here.
   useEffect(() => {
     async function loadFilteredProducts() {
       setLoading(true);
@@ -32,7 +35,7 @@ export default function ShopView() {
         };
 
         let data = await api.getProducts(filters);
-        
+
         if (tagVal === 'SALE') {
           data = data.filter(p => p.tag === 'SALE');
         }
@@ -46,7 +49,8 @@ export default function ShopView() {
     }
 
     loadFilteredProducts();
-  }, [searchParams, searchVal, tagVal, selectedCategories, selectedBrands, priceMax, sort]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.toString()]);
 
   // Handler for category checkbox change updates URL params
   const handleCategoryChange = (categoryName) => {
@@ -94,45 +98,45 @@ export default function ShopView() {
   };
 
   return (
-    <div style={{ 
-      maxWidth: 1280, 
-      margin: '0 auto', 
-      padding: '48px 28px', 
-      display: 'grid', 
-      gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
-      gap: 32, 
-      alignItems: 'start' 
+    <div style={{
+      maxWidth: 1280,
+      margin: '0 auto',
+      padding: '48px 28px',
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+      gap: 32,
+      alignItems: 'start'
     }}>
-      
+
       {/* Sidebar Filter Panel */}
-      <aside style={{ 
-        background: 'var(--surface)', 
-        borderRadius: 20, 
-        border: '1px solid var(--border)', 
-        padding: '24px', 
+      <aside style={{
+        background: 'var(--surface)',
+        borderRadius: 20,
+        border: '1px solid var(--border)',
+        padding: '24px',
         boxShadow: 'var(--sh-sm)',
         gridColumn: 'span 1'
       }} className="sticky-sidebar">
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
-          paddingBottom: 18, 
-          borderBottom: '1px solid var(--border)', 
-          marginBottom: 20 
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingBottom: 18,
+          borderBottom: '1px solid var(--border)',
+          marginBottom: 20
         }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 15 }}>
             <SlidersHorizontal size={15} style={{ color: 'var(--accent)' }} /> Filters
           </span>
-          <button 
+          <button
             onClick={handleClearAll}
-            style={{ 
-              fontSize: 12, 
-              fontWeight: 700, 
-              color: 'var(--accent)', 
-              background: 'none', 
-              border: 'none', 
-              cursor: 'pointer' 
+            style={{
+              fontSize: 12,
+              fontWeight: 700,
+              color: 'var(--accent)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer'
             }}
           >
             Clear All
@@ -146,12 +150,12 @@ export default function ShopView() {
           </div>
           {['Phone Cases', 'Chargers', 'Earphones', 'Power Banks', 'Protectors', 'Cables', 'Accessories'].map(item => (
             <label key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', cursor: 'pointer', fontSize: 13, fontWeight: 500, color: 'var(--text-2)' }}>
-              <input 
-                type="checkbox" 
-                style={{ width: 15, height: 15 }} 
+              <input
+                type="checkbox"
+                style={{ width: 15, height: 15 }}
                 checked={selectedCategories.includes(item)}
                 onChange={() => handleCategoryChange(item)}
-              /> 
+              />
               {item}
             </label>
           ))}
@@ -162,15 +166,15 @@ export default function ShopView() {
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 12 }}>
             Price Range
           </div>
-          <input 
-            type="range" 
-            min="0" 
-            max="200" 
-            value={priceMax} 
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value={priceMax}
             onChange={(e) => handlePriceChange(e.target.value)}
-            style={{ width: '100%', accentColor: 'var(--accent)' }} 
+            style={{ width: '100%', accentColor: 'var(--accent)' }}
           />
-          <div style={{ display: 'flex', justifyContext: 'space-between', justifyContent: 'space-between', fontSize: 12, fontWeight: 700, color: 'var(--text-2)', marginTop: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 700, color: 'var(--text-2)', marginTop: 6 }}>
             <span>$0</span>
             <span>${priceMax}</span>
           </div>
@@ -183,12 +187,12 @@ export default function ShopView() {
           </div>
           {['Anker', 'Belkin', 'Spigen', 'Native Union', 'Baseus'].map(b => (
             <label key={b} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', cursor: 'pointer', fontSize: 13, fontWeight: 500, color: 'var(--text-2)' }}>
-              <input 
-                type="checkbox" 
-                style={{ width: 15, height: 15 }} 
+              <input
+                type="checkbox"
+                style={{ width: 15, height: 15 }}
                 checked={selectedBrands.includes(b)}
                 onChange={() => handleBrandChange(b)}
-              /> 
+              />
               {b}
             </label>
           ))}
@@ -209,7 +213,7 @@ export default function ShopView() {
 
       {/* Product Grid Area */}
       <div style={{ gridColumn: 'span 2' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContext: 'space-between', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
           <div>
             <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)' }}>
               {searchVal ? `Search results for "${searchVal}"` : tagVal === 'SALE' ? 'Exclusive Deals' : 'All Accessories'}
@@ -218,9 +222,9 @@ export default function ShopView() {
               {loading ? 'Searching...' : `${products.length} product${products.length !== 1 ? 's' : ''} found`}
             </span>
           </div>
-          
-          <select 
-            className="finp" 
+
+          <select
+            className="finp"
             style={{ width: 'auto', padding: '9px 16px', fontSize: 13 }}
             value={sort}
             onChange={(e) => handleSortChange(e.target.value)}
@@ -237,13 +241,13 @@ export default function ShopView() {
             Loading products...
           </div>
         ) : products.length === 0 ? (
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '80px 40px', 
-            background: 'var(--surface)', 
-            borderRadius: 20, 
-            border: '1px solid var(--border)', 
-            boxShadow: 'var(--sh-sm)' 
+          <div style={{
+            textAlign: 'center',
+            padding: '80px 40px',
+            background: 'var(--surface)',
+            borderRadius: 20,
+            border: '1px solid var(--border)',
+            boxShadow: 'var(--sh-sm)'
           }}>
             <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>No products found</h3>
             <p style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 20 }}>
@@ -254,10 +258,10 @@ export default function ShopView() {
             </button>
           </div>
         ) : (
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', 
-            gap: 22 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+            gap: 22
           }}>
             {products.map(p => (
               <ProductCard key={p.id} p={p} />
