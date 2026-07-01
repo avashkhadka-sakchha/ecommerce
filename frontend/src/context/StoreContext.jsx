@@ -5,11 +5,8 @@ import { api } from '../services/api';
 const StoreContext = createContext();
 
 export function StoreProvider({ children }) {
-  const [cart, setCart] = useState(() => {
-    const saved = localStorage.getItem('cart');
-    return saved ? JSON.parse(saved) : [];
-  });
-
+  const [token, setToken] = useState(() => localStorage.getItem('token') || '');
+  const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState(() => {
     const saved = localStorage.getItem('wishlist');
     return saved ? JSON.parse(saved) : [];
@@ -19,30 +16,89 @@ export function StoreProvider({ children }) {
   const [orders, setOrders] = useState([]);
   const [loadingProfile, setLoadingProfile] = useState(true);
 
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
-
+  // Sync wishlist to localstorage
   useEffect(() => {
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
+  // Load profile, orders, and cart when token changes
   useEffect(() => {
-    async function loadInitialData() {
-      try {
-        const uProfile = await api.getProfile();
-        setProfile(uProfile);
-        
-        const uOrders = await api.getOrders();
-        setOrders(uOrders);
-      } catch (err) {
-        console.error('Error loading initial profile/orders data:', err);
-      } finally {
+    async function loadUserData() {
+      if (token) {
+        setLoadingProfile(true);
+        try {
+          localStorage.setItem('token', token);
+          const uProfile = await api.getProfile();
+          setProfile(uProfile);
+          
+          const uCart = await api.getCart();
+          setCart(uCart);
+
+          const uOrders = await api.getOrders();
+          setOrders(uOrders);
+        } catch (err) {
+          console.error('Error loading initial profile/orders data:', err);
+          handleLogout();
+        } finally {
+          setLoadingProfile(false);
+        }
+      } else {
+        setProfile(null);
+        setOrders([]);
         setLoadingProfile(false);
+        // Default cart from local storage for guests
+        const saved = localStorage.getItem('cart');
+        setCart(saved ? JSON.parse(saved) : []);
       }
     }
-    loadInitialData();
-  }, []);
+    loadUserData();
+  }, [token]);
+
+  // Sync cart changes with DB if logged in, else with localStorage
+  useEffect(() => {
+    if (token) {
+      api.updateCart(cart).catch(err => console.error('Cart sync failed:', err));
+    } else {
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+  }, [cart, token]);
+
+  const handleLogin = async (email, password) => {
+    try {
+      const data = await api.login(email, password);
+      localStorage.setItem('token', data.token);
+      setToken(data.token);
+      setProfile(data.user);
+      return data.user;
+    } catch (err) {
+      console.error('Login failed:', err);
+      throw err;
+    }
+  };
+
+  const handleRegister = async (userData) => {
+    try {
+      const data = await api.register(userData);
+      localStorage.setItem('token', data.token);
+      setToken(data.token);
+      setProfile(data.user);
+      return data.user;
+    } catch (err) {
+      console.error('Registration failed:', err);
+      throw err;
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('cart');
+    localStorage.removeItem('wishlist');
+    setToken('');
+    setProfile(null);
+    setCart([]);
+    setWishlist([]);
+    setOrders([]);
+  };
 
   const addToCart = (product, quantity = 1, variant = 'Default') => {
     setCart(prev => {
@@ -148,6 +204,8 @@ export function StoreProvider({ children }) {
       profile,
       orders,
       loadingProfile,
+      token,
+      isLoggedIn: !!token,
       cartCount: cart.reduce((sum, item) => sum + item.quantity, 0),
       addToCart,
       updateCartQty,
@@ -156,7 +214,10 @@ export function StoreProvider({ children }) {
       toggleWishlist,
       isInWishlist,
       updateProfile: handleUpdateProfile,
-      placeOrder
+      placeOrder,
+      login: handleLogin,
+      register: handleRegister,
+      logout: handleLogout
     }}>
       {children}
     </StoreContext.Provider>

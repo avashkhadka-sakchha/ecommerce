@@ -13,8 +13,13 @@
  *    - PUT /api/profile (updates profile information)
  */
 
-const USE_BACKEND = false; // Set to true when backend is ready!
+const USE_BACKEND = true; // Set to true when backend is ready!
 const API_BASE_URL = 'http://localhost:5000/api';
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
 
 // --- MOCK DATABASE (USED WHEN USE_BACKEND IS FALSE) ---
 const MOCK_PRODUCTS = [
@@ -319,7 +324,10 @@ export const api = {
     if (USE_BACKEND) {
       const response = await fetch(`${API_BASE_URL}/orders`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
         body: JSON.stringify(orderData)
       });
       if (!response.ok) throw new Error('Failed to place order');
@@ -347,7 +355,9 @@ export const api = {
    */
   async getOrders() {
     if (USE_BACKEND) {
-      const response = await fetch(`${API_BASE_URL}/orders`);
+      const response = await fetch(`${API_BASE_URL}/orders`, {
+        headers: { ...getAuthHeaders() }
+      });
       if (!response.ok) throw new Error('Failed to fetch orders');
       return await response.json();
     } else {
@@ -371,7 +381,9 @@ export const api = {
    */
   async getProfile() {
     if (USE_BACKEND) {
-      const response = await fetch(`${API_BASE_URL}/profile`);
+      const response = await fetch(`${API_BASE_URL}/profile`, {
+        headers: { ...getAuthHeaders() }
+      });
       if (!response.ok) throw new Error('Failed to fetch profile');
       return await response.json();
     } else {
@@ -403,7 +415,10 @@ export const api = {
     if (USE_BACKEND) {
       const response = await fetch(`${API_BASE_URL}/profile`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
         body: JSON.stringify(updatedProfile)
       });
       if (!response.ok) throw new Error('Failed to update profile');
@@ -413,5 +428,108 @@ export const api = {
       localStorage.setItem('profile', JSON.stringify(updatedProfile));
       return updatedProfile;
     }
+  },
+
+  /**
+   * Login user
+   */
+  async login(email, password) {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.message || 'Invalid credentials');
+    }
+    return await response.json();
+  },
+
+  /**
+   * Register user
+   */
+  async register(userData) {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    });
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.message || 'Registration failed');
+    }
+    return await response.json();
+  },
+
+  /**
+   * Get user cart
+   */
+  async getCart() {
+    const response = await fetch(`${API_BASE_URL}/cart`, {
+      headers: { ...getAuthHeaders() }
+    });
+    if (!response.ok) throw new Error('Failed to fetch cart');
+    return await response.json();
+  },
+
+  /**
+   * Update user cart
+   */
+  async updateCart(items) {
+    const response = await fetch(`${API_BASE_URL}/cart`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify({ items })
+    });
+    if (!response.ok) throw new Error('Failed to update cart');
+    return await response.json();
+  },
+
+  /**
+   * Add new product
+   */
+  async addProduct(productData) {
+    const response = await fetch(`${API_BASE_URL}/products`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify(productData)
+    });
+    if (!response.ok) throw new Error('Failed to add product');
+    return await response.json();
+  },
+
+  /**
+   * Update existing product
+   */
+  async updateProduct(id, productData) {
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify(productData)
+    });
+    if (!response.ok) throw new Error('Failed to update product');
+    return await response.json();
+  },
+
+  /**
+   * Delete product
+   */
+  async deleteProduct(id) {
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+      method: 'DELETE',
+      headers: { ...getAuthHeaders() }
+    });
+    if (!response.ok) throw new Error('Failed to delete product');
+    return await response.json();
   }
 };

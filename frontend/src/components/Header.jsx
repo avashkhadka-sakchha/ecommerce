@@ -4,7 +4,7 @@ import { Search, Heart, ShoppingBag, User } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 
 export default function Header() {
-  const { cartCount, wishlist } = useStore();
+  const { cartCount, wishlist, profile, isLoggedIn } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -152,8 +152,10 @@ export default function Header() {
             style={{ 
               display: 'flex', 
               alignItems: 'center', 
+              gap: 6,
+              padding: isLoggedIn && profile ? '0 12px' : '0',
               justifyContent: 'center', 
-              width: 40, 
+              width: isLoggedIn && profile ? 'auto' : 40, 
               height: 40, 
               borderRadius: 11, 
               color: location.pathname === '/account' ? 'var(--accent)' : 'var(--text-2)', 
@@ -164,6 +166,11 @@ export default function Header() {
             onMouseLeave={e => { if (location.pathname !== '/account') e.currentTarget.style.background = 'transparent'; }}
           >
             <User size={19} />
+            {isLoggedIn && profile && (
+              <span style={{ fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap' }}>
+                {profile.firstName}
+              </span>
+            )}
           </Link>
 
           <Link 
