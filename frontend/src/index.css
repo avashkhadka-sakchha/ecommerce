@@ -1,0 +1,356 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;0,9..144,900;1,9..144,400;1,9..144,700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #F8F7F3;
+  --surface: #FFFFFF;
+  --text: #111118;
+  --text-2: #5A5F72;
+  --text-3: #9DA3B4;
+  --accent: #2455E8;
+  --accent-bg: #EEF2FF;
+  --accent-warm: #FA5A1E;
+  --success: #10B981;
+  --border: #E5E3DC;
+  --border-md: #CDCABF;
+  --sh-sm: 0 1px 3px rgba(17,17,24,.06);
+  --sh: 0 4px 16px rgba(17,17,24,.08);
+  --sh-lg: 0 16px 48px rgba(17,17,24,.12);
+  --sh-xl: 0 24px 64px rgba(17,17,24,.16);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Outfit', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+input, select, textarea, button {
+  font-family: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img {
+  display: block;
+}
+
+.ff {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+/* Product cards */
+.pcard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all .35s cubic-bezier(.25,.46,.45,.94);
+}
+
+.pcard:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--sh-xl);
+  border-color: transparent;
+}
+
+.pcard-img {
+  overflow: hidden;
+  background: #F1F0EC;
+  aspect-ratio: 1;
+}
+
+.pcard-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .55s cubic-bezier(.25,.46,.45,.94);
+}
+
+.pcard:hover .pcard-img img {
+  transform: scale(1.08);
+}
+
+.qadd {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all .25s ease;
+}
+
+.pcard:hover .qadd {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Marquee */
+@keyframes marq {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.marq {
+  animation: marq 32s linear infinite;
+  display: flex;
+  width: max-content;
+}
+
+/* Fade-up animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.a0 { animation: fadeUp .7s ease forwards; }
+.a1 { animation: fadeUp .7s ease .12s forwards; opacity: 0; }
+.a2 { animation: fadeUp .7s ease .24s forwards; opacity: 0; }
+.a3 { animation: fadeUp .7s ease .36s forwards; opacity: 0; }
+
+/* Nav underline */
+.nl {
+  position: relative;
+}
+
+.nl::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform .22s ease;
+}
+
+.nl:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Category card */
+.ccard {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  transition: all .25s ease;
+  display: block;
+}
+
+.ccard:hover {
+  border-color: var(--accent);
+  box-shadow: 0 6px 24px rgba(36,85,232,.12);
+  transform: translateY(-3px);
+}
+
+.ccard:hover .cicon {
+  background: var(--accent-bg) !important;
+}
+
+/* Buttons */
+.btn {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  font-weight: 700;
+  border-radius: 12px;
+  transition: all .2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.btn-p {
+  background: var(--accent);
+  color: #fff;
+  padding: 13px 24px;
+  font-size: 14px;
+}
+
+.btn-p:hover {
+  background: #1A44D4;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(36, 85, 232, .35);
+}
+
+.btn-s {
+  background: transparent;
+  color: var(--text);
+  border: 1.5px solid var(--border-md);
+  padding: 12px 22px;
+  font-size: 14px;
+}
+
+.btn-s:hover {
+  border-color: var(--text);
+  background: var(--surface);
+}
+
+.btn-sm {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+/* Form inputs */
+.finp {
+  width: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  background: #F5F4F0;
+  border: 1.5px solid transparent;
+  border-radius: 11px;
+  padding: 11px 16px;
+  color: var(--text);
+  transition: all .2s ease;
+  outline: none;
+}
+
+.finp:focus {
+  background: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(36, 85, 232, .1);
+}
+
+.finp::placeholder {
+  color: var(--text-3);
+}
+
+/* Tags */
+.tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+.tag-n {
+  background: var(--accent);
+  color: #fff;
+}
+
+.tag-s {
+  background: var(--accent-warm);
+  color: #fff;
+}
+
+/* Stars */
+.star-f {
+  fill: #FBBF24;
+  color: #FBBF24;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-md);
+  border-radius: 10px;
+}
+
+.noscroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.noscroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mesh bg */
+.mesh {
+  background: radial-gradient(ellipse at 18% 50%, rgba(36,85,232,.07) 0%, transparent 55%), radial-gradient(ellipse at 82% 30%, rgba(250,90,30,.05) 0%, transparent 50%), var(--bg);
+}
+
+/* Tab buttons */
+.tabBtn {
+  padding: 14px 0;
+  font-size: 15px;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-2);
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -1.5px;
+  transition: all .2s ease;
+}
+
+.tabBtn.on {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* Account menu btn */
+.amBtn {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all .15s ease;
+}
+
+.amBtn:hover {
+  background: #F5F4F0;
+  color: var(--text);
+}
+
+.amBtn.on {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+/* Thumb active state */
+.thumb-active {
+  border: 2.5px solid var(--accent) !important;
+}
+
+/* Floating card */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.float {
+  animation: floatY 4s ease-in-out infinite;
+}
+
+.float2 {
+  animation: floatY 4.5s ease-in-out .8s infinite;
+}
+
+/* Filter checkbox */
+input[type=checkbox], input[type=radio] {
+  accent-color: var(--accent);
+}
