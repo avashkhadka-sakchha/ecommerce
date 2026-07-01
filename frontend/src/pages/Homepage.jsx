@@ -51,7 +51,7 @@ export default function Homepage() {
       </div>
 
       {/* Hero */}
-      <section className="mesh" style={{ padding: '80px 0 100px', overflow: 'hidden' }}>
+      <section className="mesh" style={{ padding: '80px 0 0', overflow: 'hidden' }}>
         <Wrap>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 60, alignItems: 'center' }}>
             
@@ -228,30 +228,6 @@ export default function Homepage() {
           </div>
         </Wrap>
       </section>
-
-      {/* Trust bar */}
-      <div style={{ background: 'var(--text)', padding: '32px 0' }}>
-        <Wrap>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 32 }}>
-            {[
-              { icon: <Truck size={20} style={{ color: '#60A5FA' }} />, bg: 'rgba(96,165,250,.12)', title: 'Free Delivery', desc: 'On orders over NPR 999' },
-              { icon: <Shield size={20} style={{ color: '#34D399' }} />, bg: 'rgba(52,211,153,.12)', title: 'Secure Checkout', desc: 'SSL encrypted & safe' },
-              { icon: <RotateCcw size={20} style={{ color: '#FB923C' }} />, bg: 'rgba(251,146,60,.12)', title: '7-Day Returns', desc: 'Hassle-free process' },
-              { icon: <Award size={20} style={{ color: '#A78BFA' }} />, bg: 'rgba(167,139,250,.12)', title: 'Genuine Products', desc: '100% authenticity' },
-            ].map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ width: 44, height: 44, background: item.bg, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  {item.icon}
-                </div>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 2 }}>{item.title}</div>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,.4)', fontWeight: 500 }}>{item.desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Wrap>
-      </div>
 
       {/* Shop by Category */}
       <section style={{ padding: '80px 0' }}>
