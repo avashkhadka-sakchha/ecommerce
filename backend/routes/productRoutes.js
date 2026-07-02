@@ -60,6 +60,19 @@ router.get('/', async (req, res) => {
   }
 });
 
+// @desc    Get products uploaded by the logged-in user
+// @route   GET /api/products/my
+// @access  Private/Manager,Admin
+router.get('/my', protect, authorize('manager', 'admin'), async (req, res) => {
+  try {
+    const products = await Product.find({ createdBy: req.user._id }).sort({ createdAt: -1 });
+    res.json(products);
+  } catch (error) {
+    console.error('Fetch my products error:', error);
+    res.status(500).json({ message: 'Server error, failed to fetch your products' });
+  }
+});
+
 // @desc    Get single product by custom id
 // @route   GET /api/products/:id
 // @access  Public
@@ -90,6 +103,7 @@ router.post('/', protect, authorize('manager', 'admin'), async (req, res) => {
 
     const product = new Product({
       id,
+      createdBy: req.user._id,
       name,
       category,
       price: parseFloat(price),
@@ -113,30 +127,35 @@ router.post('/', protect, authorize('manager', 'admin'), async (req, res) => {
 
 // @desc    Update a product
 // @route   PUT /api/products/:id
-// @access  Private/Manager,Admin
+// @access  Private/Manager,Admin (only owner or admin)
 router.put('/:id', protect, authorize('manager', 'admin'), async (req, res) => {
   try {
     const { name, category, price, originalPrice, tag, brand, image, images, desc, specs } = req.body;
 
     const product = await Product.findOne({ id: req.params.id });
 
-    if (product) {
-      product.name = name || product.name;
-      product.category = category || product.category;
-      product.price = price !== undefined ? parseFloat(price) : product.price;
-      product.originalPrice = originalPrice !== undefined ? parseFloat(originalPrice) : product.originalPrice;
-      product.tag = tag !== undefined ? tag : product.tag;
-      product.brand = brand || product.brand;
-      product.image = image || product.image;
-      product.images = images || product.images;
-      product.desc = desc || product.desc;
-      product.specs = specs || product.specs;
-
-      const updatedProduct = await product.save();
-      res.json(updatedProduct);
-    } else {
-      res.status(404).json({ message: 'Product not found' });
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
     }
+
+    // Ownership check: only the creator or an admin can edit
+    if (product.createdBy && product.createdBy.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You can only edit products you uploaded' });
+    }
+
+    product.name = name || product.name;
+    product.category = category || product.category;
+    product.price = price !== undefined ? parseFloat(price) : product.price;
+    product.originalPrice = originalPrice !== undefined ? parseFloat(originalPrice) : product.originalPrice;
+    product.tag = tag !== undefined ? tag : product.tag;
+    product.brand = brand || product.brand;
+    product.image = image || product.image;
+    product.images = images || product.images;
+    product.desc = desc || product.desc;
+    product.specs = specs || product.specs;
+
+    const updatedProduct = await product.save();
+    res.json(updatedProduct);
   } catch (error) {
     console.error('Update product error:', error);
     res.status(500).json({ message: 'Server error, failed to update product' });
@@ -145,16 +164,22 @@ router.put('/:id', protect, authorize('manager', 'admin'), async (req, res) => {
 
 // @desc    Delete a product
 // @route   DELETE /api/products/:id
-// @access  Private/Manager,Admin
+// @access  Private/Manager,Admin (only owner or admin)
 router.delete('/:id', protect, authorize('manager', 'admin'), async (req, res) => {
   try {
-    const product = await Product.findOneAndDelete({ id: req.params.id });
+    const product = await Product.findOne({ id: req.params.id });
 
-    if (product) {
-      res.json({ message: 'Product removed' });
-    } else {
-      res.status(404).json({ message: 'Product not found' });
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
     }
+
+    // Ownership check: only the creator or an admin can delete
+    if (product.createdBy && product.createdBy.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You can only delete products you uploaded' });
+    }
+
+    await Product.findOneAndDelete({ id: req.params.id });
+    res.json({ message: 'Product removed' });
   } catch (error) {
     console.error('Delete product error:', error);
     res.status(500).json({ message: 'Server error, failed to delete product' });

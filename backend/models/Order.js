@@ -13,7 +13,7 @@ const orderSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   id: { type: String, required: true, unique: true },
   date: { type: String, default: () => new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) },
-  status: { type: String, enum: ['Processing', 'Shipped', 'Delivered'], default: 'Processing' },
+  status: { type: String, enum: ['Pending', 'Processing', 'Packed', 'Shipped', 'Delivered', 'Cancelled'], default: 'Pending' },
   items: [orderItemSchema],
   shipping: {
     name: { type: String, required: true },
